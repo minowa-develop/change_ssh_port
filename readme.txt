@@ -1,0 +1,4 @@
+SSHのポートを変更するshellです
+
+change_ssh_port.shを実行して、変更したいポート番号を入力してください
+ssh,selinux,firewallの設定を反映します。
