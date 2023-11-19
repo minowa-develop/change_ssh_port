@@ -11,7 +11,8 @@ if [ ${#PORT} -eq 0 ];then
 fi
 
 read -p "setting key only login. [true,false]>" KEY_ONLY
-if [ $KEY_ONLY -eq "true" ]; then
+if [ $KEY_ONLY = "true" ]; then
+  find /* -name "authorized_keys" | xargs -i{arg} chmod 600 {arg}
   sed -ri "s/#?PasswordAuthentication .*/PasswordAuthentication no/" $SSH_CONFIG_PATH
   echo "setting key only login success!!"
 fi
