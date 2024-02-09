@@ -1,8 +1,7 @@
-# input port
-read -p "input ssh port>" PORT
+#!/bin/bash
 
-# constant
-SSH_CONFIG_PATH="/etc/ssh/sshd_config"
+# input port
+read -rp "input ssh port>" PORT
 
 # validate
 if [ ${#PORT} -eq 0 ];then
@@ -10,16 +9,20 @@ if [ ${#PORT} -eq 0 ];then
   exit
 fi
 
-read -p "setting key only login. [true,false]>" KEY_ONLY
-if [ $KEY_ONLY = "true" ]; then
-  find /* -name "authorized_keys" | xargs -i{arg} chmod 600 {arg}
-  sed -ri "s/#?PasswordAuthentication .*/PasswordAuthentication no/" $SSH_CONFIG_PATH
+# deploy key file
+read -rp "setting key only login. [true,false]>" KEY_ONLY
+if [ "${KEY_ONLY}" = "true" ]; then
+  if [ ! -e "/root/.ssh/authorized_keys" ]; then
+    cp ./authorized_keys /root/.ssh/
+  fi
+  chmod 600 /root/.ssh/authorized_keys
+  echo "PasswordAuthentication no" > /etc/ssh/sshd_config.d/PasswordAuthentication.conf
   echo "setting key only login success!!"
 fi
 
 # modify ssh and selinux
-sed -ri "s/#?Port .*/Port ${PORT}/g" $SSH_CONFIG_PATH
-semanage port -a -t ssh_port_t -p tcp $PORT
+echo "Port ${PORT}" > /etc/ssh/sshd_config.d/port.conf
+semanage port -a -t ssh_port_t -p tcp "${PORT}"
 
 # modify firewall service
 \cp -r /lib/firewalld/services/ssh.xml /etc/firewalld/services/
